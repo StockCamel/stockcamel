@@ -1,12 +1,312 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="css/styles.css">
-    <title>StockCamel Corner</title>
-  </head>
-  <body>
-    <script src="js/script.js></script>
-    <h1>Welocme to my site!</h1>
-    <p>This is my personal site for some stuff</p>
-  </body>
-</html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blueprint: Путь Подростка к Силе</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        /* Custom Scrollbar for nicer UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+        .tab-active {
+            border-bottom: 2px solid #ea580c; /* orange-600 */
+            color: #ea580c;
+            font-weight: 600;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone/Zinc) with Energetic Orange Accents -->
+    <!-- Application Structure Plan: Dashboard layout with top navigation tabs. 
+         1. 'Главная' (Dashboard): Overview, Quick Stats, Myth Busting.
+         2. 'Физиология' (Biology): Growth plates explanation, Recovery chart.
+         3. 'Питание' (Nutrition): Interactive TDEE Calculator, Macro Pie Chart.
+         4. 'Тренировки' (Training): Exercise filter (Push/Pull/Legs), Progressive Overload Graph.
+         Structure chosen to allow linear learning (Basics -> Food -> Action) or direct tool access.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Myth Buster: Text toggle cards. Goal: Address safety concerns immediately.
+         2. Macro Calculator: Input fields -> Dynamic Text & Doughnut Chart. Goal: Personalize nutrition.
+         3. Strength Curve: Line Chart. Goal: Set realistic expectations (Newbie gains vs Plateau).
+         4. Sleep Impact: Bar Chart. Goal: Show quantitative impact of rest on hormones.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-stone-900 tracking-tight">
+                        STRONG<span class="text-orange-600">TEEN</span>
+                    </div>
+                </div>
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-active py-2 px-1 text-sm transition-colors hover:text-orange-500">Главная</button>
+                    <button onclick="switchTab('physiology')" id="nav-physiology" class="text-stone-500 py-2 px-1 text-sm transition-colors hover:text-orange-500">Физиология</button>
+                    <button onclick="switchTab('nutrition')" id="nav-nutrition" class="text-stone-500 py-2 px-1 text-sm transition-colors hover:text-orange-500">Питание</button>
+                    <button onclick="switchTab('training')" id="nav-training" class="text-stone-500 py-2 px-1 text-sm transition-colors hover:text-orange-500">Тренировки</button>
+                </nav>
+                <!-- Mobile Menu Button (Simplified for this demo to just an icon) -->
+                <div class="md:hidden text-stone-500 font-bold cursor-pointer" onclick="toggleMobileMenu()">
+                    ☰
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-stone-100 px-4 py-2 shadow-lg absolute w-full">
+            <button onclick="switchTab('dashboard')" class="block w-full text-left py-2 text-stone-700 hover:text-orange-600">Главная</button>
+            <button onclick="switchTab('physiology')" class="block w-full text-left py-2 text-stone-700 hover:text-orange-600">Физиология</button>
+            <button onclick="switchTab('nutrition')" class="block w-full text-left py-2 text-stone-700 hover:text-orange-600">Питание</button>
+            <button onclick="switchTab('training')" class="block w-full text-left py-2 text-stone-700 hover:text-orange-600">Тренировки</button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- VIEW: DASHBOARD (Home) -->
+        <section id="view-dashboard" class="fade-in space-y-8">
+            <!-- Hero Section -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-10 border border-stone-100 flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-1">
+                    <h1 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4">Как стать <span class="text-orange-600">невероятно сильным</span>?</h1>
+                    <p class="text-lg text-stone-600 mb-6 leading-relaxed">
+                        Это не магия, а наука. Этот интерактивный гид основан на принципах спортивной физиологии и поможет тебе построить сильное, здоровое тело. Исследуй разделы, используй калькуляторы и начни свой путь сегодня.
+                    </p>
+                    <button onclick="switchTab('nutrition')" class="bg-stone-900 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors shadow-md">
+                        Начать с Питания →
+                    </button>
+                </div>
+                <div class="w-full md:w-1/3 bg-orange-50 rounded-xl p-6 border border-orange-100">
+                    <h3 class="font-bold text-orange-800 mb-3 text-lg">💡 Ключевые Принципы</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="mr-2 text-orange-500">1.</span>
+                            <span class="text-sm text-stone-700"><strong>Постоянство:</strong> Регулярность важнее интенсивности.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2 text-orange-500">2.</span>
+                            <span class="text-sm text-stone-700"><strong>Прогрессия:</strong> Нужно делать чуть больше, чем в прошлый раз.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2 text-orange-500">3.</span>
+                            <span class="text-sm text-stone-700"><strong>Восстановление:</strong> Мышцы растут во сне, а не в зале.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Myth Buster Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Myth 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 cursor-pointer hover:shadow-md transition-shadow group" onclick="toggleMyth('myth1')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-stone-800">Миф: "Качалка останавливает рост"</h3>
+                        <span class="text-stone-400 group-hover:text-orange-500">▼</span>
+                    </div>
+                    <div id="myth1-content" class="hidden text-stone-600 text-sm mt-2 border-t pt-2">
+                        <p><strong class="text-green-600">Факт:</strong> Научные исследования показывают, что силовые тренировки с правильной техникой не повреждают зоны роста. Наоборот, они увеличивают плотность костей и снижают риск травм в других видах спорта.</p>
+                    </div>
+                    <p class="text-stone-500 text-xs" id="myth1-teaser">Нажми, чтобы узнать правду...</p>
+                </div>
+                
+                <!-- Myth 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 cursor-pointer hover:shadow-md transition-shadow group" onclick="toggleMyth('myth2')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-stone-800">Миф: "Нужно тренироваться каждый день"</h3>
+                        <span class="text-stone-400 group-hover:text-orange-500">▼</span>
+                    </div>
+                    <div id="myth2-content" class="hidden text-stone-600 text-sm mt-2 border-t pt-2">
+                        <p><strong class="text-green-600">Факт:</strong> Мышцам нужно 48-72 часа на восстановление после тяжелой нагрузки. Тренировки каждый день ведут к перетренированности и остановке прогресса. 3-4 раза в неделю оптимально для новичка.</p>
+                    </div>
+                    <p class="text-stone-500 text-xs" id="myth2-teaser">Нажми, чтобы узнать правду...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: PHYSIOLOGY -->
+        <section id="view-physiology" class="hidden fade-in space-y-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-stone-800 mb-4">Физиология Роста Силы</h2>
+                <p class="text-stone-600 mb-6">
+                    Понимание того, как работает твое тело — первый шаг к силе. В подростковом возрасте гормональный фон создает идеальные условия для роста, но пренебрежение сном может всё перечеркнуть.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <!-- Chart: Sleep Impact -->
+                    <div class="bg-stone-50 p-4 rounded-xl border border-stone-200">
+                        <h3 class="text-lg font-semibold text-center mb-2">Влияние Сна на Тестостерон</h3>
+                        <p class="text-xs text-stone-500 text-center mb-4">Сравнение уровней при 8 часах vs 5 часах сна</p>
+                        <div class="chart-container">
+                            <canvas id="sleepChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Text Info -->
+                    <div class="space-y-4">
+                        <div class="p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r-lg">
+                            <h4 class="font-bold text-orange-900">Гормон Роста (HGH)</h4>
+                            <p class="text-sm text-orange-800">До 70% гормона роста выделяется во время фазы глубокого сна. Если ты спишь меньше 8 часов, ты буквально крадешь у себя результаты.</p>
+                        </div>
+                        <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <h4 class="font-bold text-blue-900">Нейромышечная Адаптация</h4>
+                            <p class="text-sm text-blue-800">Первые 4-6 недель рост силы происходит не за счет роста мышц, а за счет того, что мозг учится эффективнее включать мышечные волокна.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: NUTRITION -->
+        <section id="view-nutrition" class="hidden fade-in space-y-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-stone-800 mb-2">Лаборатория Питания</h2>
+                <p class="text-stone-600 mb-6">Еда — это топливо. Без достаточного количества "строительного материала" тренировки бесполезны. Рассчитай свои потребности.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Calculator Inputs -->
+                    <div class="lg:col-span-1 space-y-4 bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <h3 class="font-bold text-lg mb-4">Твой профиль</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">Вес (кг)</label>
+                            <input type="number" id="calc-weight" value="60" class="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">Активность</label>
+                            <select id="calc-activity" class="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                                <option value="1.2">Сидячий образ</option>
+                                <option value="1.375">Легкая (1-3 трен/нед)</option>
+                                <option value="1.55" selected>Средняя (3-5 трен/нед)</option>
+                                <option value="1.725">Высокая (6-7 трен/нед)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-stone-700 mb-1">Цель</label>
+                            <select id="calc-goal" class="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:outline-none">
+                                <option value="build" selected>Набрать массу</option>
+                                <option value="maintain">Поддержать форму</option>
+                                <option value="cut">Сжечь жир</option>
+                            </select>
+                        </div>
+
+                        <button onclick="calculateNutrition()" class="w-full bg-stone-900 text-white py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors mt-4">Рассчитать</button>
+                    </div>
+
+                    <!-- Results Display -->
+                    <div class="lg:col-span-2 flex flex-col md:flex-row gap-6 items-center justify-center bg-white p-4 rounded-xl">
+                        <!-- Chart -->
+                        <div class="w-full md:w-1/2 flex justify-center">
+                            <div class="chart-container" style="height: 250px; max-width: 250px;">
+                                <canvas id="macroChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Text Breakdown -->
+                        <div class="w-full md:w-1/2 space-y-4">
+                            <div class="text-center md:text-left">
+                                <p class="text-sm text-stone-500 uppercase tracking-wide">Суточная Норма</p>
+                                <p class="text-4xl font-bold text-stone-900" id="result-calories">2500 <span class="text-lg font-normal text-stone-500">ккал</span></p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-red-400 mr-2"></span>Белки</span>
+                                    <span class="font-bold" id="result-protein">120 г</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span>Жиры</span>
+                                    <span class="font-bold" id="result-fats">70 г</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-green-400 mr-2"></span>Углеводы</span>
+                                    <span class="font-bold" id="result-carbs">310 г</span>
+                                </div>
+                            </div>
+                            <div class="bg-stone-50 p-3 rounded text-xs text-stone-600">
+                                <strong>Совет:</strong> Ешь белок (яйца, мясо, рыба, творог) в каждом приеме пищи для максимального синтеза мышц.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: TRAINING -->
+        <section id="view-training" class="hidden fade-in space-y-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-stone-800 mb-2">Архитектура Тренировок</h2>
+                <p class="text-stone-600 mb-6">Программа не должна быть сложной. Главное — базовые движения (многосуставные упражнения) и прогрессия нагрузок.</p>
+
+                <!-- Progression Chart -->
+                <div class="mb-10">
+                    <h3 class="text-lg font-semibold mb-4">Прогноз Роста Силы (1 год)</h3>
+                    <div class="chart-container w-full">
+                        <canvas id="strengthChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-400 mt-2">При условии регулярных тренировок и питания.</p>
+                </div>
+
+                <!-- Interactive Exercise Grid -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">База Упражнений</h3>
+                    <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+                        <button onclick="filterExercises('push')" class="ex-filter-btn bg-stone-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-100 active:bg-orange-200 transition-colors" data-type="push">Тяни (Push)</button>
+                        <button onclick="filterExercises('pull')" class="ex-filter-btn bg-stone-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-100 active:bg-orange-200 transition-colors" data-type="pull">Толкай (Pull)</button>
+                        <button onclick="filterExercises('legs')" class="ex-filter-btn bg-stone-200 px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-100 active:bg-orange-200 transition-colors" data-type="legs">Ноги (Legs)</button>
+                        <button onclick="filterExercises('all')" class="ex-filter-btn bg-stone-900 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md" data-type="all">Всё</button>
+                    </div>
+
+                    <div id="exercise-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-8 mt-8 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="mb-2 font-semibold text-stone-200">Blueprint: Путь Подростка к Силе</p>
+            <p class="text-sm max-w-2xl mx-auto">
+                Данная информация носит образовательный характер. Перед началом любой программы тренировок обязательно пр
